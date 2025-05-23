@@ -1,0 +1,90 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency directories
+node_modules/
+bower_components/
+
+# Build directories
+build/
+dist/
+
+
+
+# Database
+*.sqlite
+*.sqlite3
+dump.rdb
+*.lock
+mongod.lock
+data/db/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Editor-specific files
+.vscode/
+.idea/
+*.swp
+
+# Testing
+coverage/
+.nyc_output/
+
+# Temp files
+tmp/
+temp/
+
+# Parcel-bundler
+.cache/
+
+# Next.js
+.next/
+out/
+
+# Nuxt.js
+.nuxt/
+static/
+
+# React Native
+.expo/
+.expo-shared/
+
+# Misc
+*.tgz
+*.log
+*.out
+*.pid
+*.seed
+*.seed.*
+*.orig
+
+# ESLint cache
+.eslintcache
+
+# Yarn
+.pnp.*
+.yarn-integrity
+
+# Optional npm cache
+.npm
+
+# SASS cache
+.sass-cache/
+
+# TypeScript
+*.tsbuildinfo
+
+# PM2 logs and dump
+pids/
+*.pid
+*.gz
+dump.pm2
+
+# Custom
+public/assets/
