@@ -4,7 +4,8 @@ const { auth } = require('../middleware/auth');
 const {
     createPayment,
     getPaymentById,
-    getPaymentsByDateRange
+    getPaymentsByDateRange,
+    getAllPayments
 } = require('../controllers/paymentController');
 
 // Protected routes
@@ -14,5 +15,6 @@ router.use(auth);
 router.post('/', createPayment);
 router.get('/:id', getPaymentById);
 router.get('/range', getPaymentsByDateRange);
+router.get('/all', getAllPayments);
 
-module.exports = router; 
+module.exports = router;

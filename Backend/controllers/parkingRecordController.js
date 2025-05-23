@@ -122,26 +122,31 @@ exports.deleteParkingRecord = async (req, res) => {
 // Get daily report
 exports.getDailyReport = async (req, res) => {
     try {
-        const { date } = req.query;
-        const startDate = new Date(date);
-        startDate.setHours(0, 0, 0, 0);
-        const endDate = new Date(date);
-        endDate.setHours(23, 59, 59, 999);
-
         const records = await ParkingRecord.find({
-            entryTime: { $gte: startDate, $lte: endDate }
-        }).sort({ entryTime: 1 });
+            exitTime: { $exists: true }
+        });
 
-        const report = records.map(record => ({
-            plateNumber: record.plateNumber,
-            entryTime: record.entryTime,
-            exitTime: record.exitTime,
-            duration: record.duration,
-            amountPaid: record.amountPaid
-        }));
+        // Calculate summary
+        const totalRecords = records.length;
+        const totalAmount = records.reduce((sum, record) => sum + (record.amountPaid || 0), 0);
+        const averageDuration = records.reduce((sum, record) => {
+            if (record.exitTime && record.entryTime) {
+                const duration = (record.exitTime - record.entryTime) / (1000 * 60 * 60); // in hours
+                return sum + duration;
+            }
+            return sum;
+        }, 0) / (totalRecords || 1);
 
-        res.json(report);
+        res.json({
+            records,
+            summary: {
+                totalRecords,
+                totalAmount,
+                averageDuration: parseFloat(averageDuration.toFixed(2))
+            }
+        });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Daily report error:', error);
+        res.status(500).json({ error: 'Error generating daily report' });
     }
-}; 
+};

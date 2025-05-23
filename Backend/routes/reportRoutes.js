@@ -1,42 +1,58 @@
 const express = require('express');
 const router = express.Router();
-const ParkingRecord = require('../models/parkingRecord');
+const ParkingRecord = require('../models/ParkingRecord');
 const { auth } = require('../middleware/auth');
 
-// Get daily report
+// Get all completed parking records (report)
 router.get('/daily', auth, async (req, res) => {
     try {
-        const { date } = req.query;
-        if (!date) {
-            return res.status(400).json({ error: 'Date is required' });
-        }
-        const startDate = new Date(date);
-        if (isNaN(startDate)) {
-            return res.status(400).json({ error: 'Invalid date format' });
-        }
-        startDate.setHours(0, 0, 0, 0);
-        const endDate = new Date(date);
-        endDate.setHours(23, 59, 59, 999);
-
-        const records = await ParkingRecord.find({
-            entryTime: { $gte: startDate, $lte: endDate },
-            exitTime: { $exists: true }
-        }).populate('plateNumber', 'plateNumber');
+        // Aggregate to join Car and format output
+        const records = await ParkingRecord.aggregate([
+            { $match: { exitTime: { $exists: true, $ne: null } } },
+            {
+                $lookup: {
+                    from: 'cars',
+                    localField: 'plateNumber',
+                    foreignField: '_id',
+                    as: 'car'
+                }
+            },
+            { $unwind: { path: '$car', preserveNullAndEmptyArrays: true } },
+            {
+                $project: {
+                    _id: 1,
+                    plateNumber: { $ifNull: ['$car.plateNumber', 'Unknown'] },
+                    entryTime: 1,
+                    exitTime: 1,
+                    duration: {
+                        $cond: [
+                            { $and: ['$exitTime', '$entryTime'] },
+                            { $divide: [{ $subtract: ['$exitTime', '$entryTime'] }, 1000 * 60 * 60] },
+                            0
+                        ]
+                    },
+                    amountPaid: { $ifNull: ['$amountPaid', 0] }
+                }
+            }
+        ]);
 
         // Calculate summary
         const totalRecords = records.length;
-        const totalAmount = records.reduce((sum, record) => sum + (record.amountPaid || 0), 0);
-        const averageDuration = records.reduce((sum, record) => {
-            const duration = (record.exitTime - record.entryTime) / (1000 * 60 * 60); // in hours
-            return sum + duration;
-        }, 0) / (totalRecords || 1);
+        const totalAmount = records.reduce((sum, r) => sum + (r.amountPaid || 0), 0);
+        const averageDuration = totalRecords
+            ? records.reduce((sum, r) => sum + (r.duration || 0), 0) / totalRecords
+            : 0;
 
         res.json({
-            records,
+            records: records.map(r => ({
+                ...r,
+                duration: r.duration ? r.duration.toFixed(2) : '0.00',
+                amountPaid: r.amountPaid || 0
+            })),
             summary: {
                 totalRecords,
                 totalAmount,
-                averageDuration: parseFloat(averageDuration.toFixed(2))
+                averageDuration: averageDuration.toFixed(2)
             }
         });
     } catch (error) {

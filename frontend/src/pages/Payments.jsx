@@ -1,25 +1,21 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { format, subDays } from 'date-fns';
+import { format } from 'date-fns';
 
 const Payments = () => {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState({
-    startDate: format(subDays(new Date(), 7), 'yyyy-MM-dd'),
-    endDate: format(new Date(), 'yyyy-MM-dd')
-  });
 
   useEffect(() => {
     fetchPayments();
-  }, [dateRange]);
+  }, []);
 
   const fetchPayments = async () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `https://localhost:5000/api/payments/range?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`,
+        `http://localhost:5000/api/payments/all`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setPayments(response.data);
@@ -28,14 +24,6 @@ const Payments = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleDateChange = (e) => {
-    const { name, value } = e.target;
-    setDateRange(prev => ({
-      ...prev,
-      [name]: value
-    }));
   };
 
   const calculateTotal = () => {
@@ -57,40 +45,6 @@ const Payments = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white shadow sm:rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg font-medium leading-6 text-gray-900">Payment History</h3>
-          <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
-                Start Date
-              </label>
-              <input
-                type="date"
-                id="startDate"
-                name="startDate"
-                value={dateRange.startDate}
-                onChange={handleDateChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              />
-            </div>
-            <div>
-              <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
-                End Date
-              </label>
-              <input
-                type="date"
-                id="endDate"
-                name="endDate"
-                value={dateRange.endDate}
-                onChange={handleDateChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="bg-white shadow sm:rounded-lg">
         <div className="px-4 py-5 sm:p-6">
           <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Summary</h3>

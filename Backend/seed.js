@@ -41,7 +41,7 @@ async function seed() {
 
   const parkingRecords = await ParkingRecord.insertMany([
     {
-      plateNumber: cars[0].plateNumber,
+      plateNumber: cars[0]._id,
       slotNumber: slots[0].slotNumber,
       entryTime: earlier,
       exitTime: now,
@@ -50,7 +50,7 @@ async function seed() {
       isPaid: true
     },
     {
-      plateNumber: cars[1].plateNumber,
+      plateNumber: cars[1]._id,
       slotNumber: slots[1].slotNumber,
       entryTime: oneHourAgo,
       exitTime: now,
@@ -59,7 +59,7 @@ async function seed() {
       isPaid: true
     },
     {
-      plateNumber: cars[2].plateNumber,
+      plateNumber: cars[2]._id,
       slotNumber: slots[2].slotNumber,
       entryTime: now,
       // Still parked, no exitTime, unpaid

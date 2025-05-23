@@ -2,9 +2,9 @@ const mongoose = require('mongoose');
 
 const parkingRecordSchema = new mongoose.Schema({
     plateNumber: {
-        type: String,
-        required: true,
-        ref: 'Car'
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Car',
+        required: true
     },
     slotNumber: {
         type: String,

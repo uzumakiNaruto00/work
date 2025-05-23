@@ -69,3 +69,15 @@ exports.getPaymentsByDateRange = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+exports.getAllPayments = async (req, res) => {
+    try {
+        console.log('Attempting to fetch all payments...');
+        const payments = await Payment.find({}).sort({ paymentDate: -1 });
+        console.log('Payments fetched successfully:', payments);
+        res.json(payments);
+    } catch (error) {
+        console.error('Error fetching payments:', error);
+        res.status(500).json({ error: error.message });
+    }
+};
